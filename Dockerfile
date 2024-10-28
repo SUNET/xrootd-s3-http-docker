@@ -36,4 +36,5 @@ RUN apt-get update && \
 COPY --from=build /opt/xrootd-s3-http/build/libXrdS3-5.so /usr/lib/
 COPY --from=build /opt/xrootd-s3-http/build/libXrdHTTPServer-5.so /usr/lib/
 COPY ./xrootd-s3-http.cfg /etc/xrootd/
+USER xrootd
 CMD ["xrootd", "-c", "/etc/xrootd/xrootd-s3-http.cfg"]
