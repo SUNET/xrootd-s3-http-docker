@@ -1,0 +1,15 @@
+---
+environment_variables:
+  XROOTD_S3_HTTP_VERSION: "0.17.0-1"
+git:
+  branch: main
+triggers:
+  cron: "@daily"
+clean_workspace: true
+builders:
+  - docker
+docker_name: staas/xrootd-s3-http
+docker_tags:
+  - "${XROOTD_S3_HTTP_VERSION}"
+  - "latest"
+docker_no_cache: true

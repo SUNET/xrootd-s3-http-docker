@@ -1,0 +1,43 @@
+From 5a00e83545ba8268c7fc153370adb40c94203a89 Mon Sep 17 00:00:00 2001
+From: Mattias Ellert <mattias.ellert@physics.uu.se>
+Date: Thu, 24 Oct 2024 16:55:10 +0200
+Subject: [PATCH] Fix some cmake glitches
+
+Do not overwrite the original values of CMAKE_SHARED_LINKER_FLAGS and
+CMAKE_MODULE_LINKER_FLAGS. The original values contain the content of
+the LDFLAGS environment variable. If these variables are overwritten
+instead of extended, the content of LDFLAGS will be ignored.
+
+Use the module name when calling find_package, not the target name
+defined in the module.
+---
+ CMakeLists.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4578acf..c6a709e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -44,15 +44,15 @@ if( CMAKE_COMPILER_IS_GNUCXX )
+ endif()
+ 
+ if(NOT APPLE)
+-  SET( CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
+-  SET( CMAKE_MODULE_LINKER_FLAGS "-Wl,--no-undefined")
++  SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
++  SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
+ endif()
+ 
+ if( NOT XROOTD_EXTERNAL_TINYXML2 )
+ 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 	add_subdirectory(vendor/tinyxml2)
+ else()
+-	find_package(tinyxml2::tinyxml2)
++	find_package(tinyxml2)
+ endif()
+ 
+ include_directories(${XROOTD_INCLUDES} ${CURL_INCLUDE_DIRS} ${LIBCRYPTO_INCLUDE_DIRS})
+-- 
+2.47.0
+
+
