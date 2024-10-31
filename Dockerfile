@@ -32,7 +32,7 @@ RUN make
 FROM debian:trixie-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    xrootd-server libc6 libcurl4t64 libgcc-s1 libssl3t64 libstdc++6 libtinyxml2-10 libxrdserver3t64 libxrdutils3t64
+    xrootd-server libc6 libcurl4t64 libgcc-s1 libssl3t64 libstdc++6 libtinyxml2-10 libxrdserver3t64 libxrdutils3t64 ca-certificates
 COPY --from=build /opt/xrootd-s3-http/build/libXrdS3-5.so /usr/lib/
 COPY --from=build /opt/xrootd-s3-http/build/libXrdHTTPServer-5.so /usr/lib/
 COPY ./xrootd-s3-http.cfg /etc/xrootd/
