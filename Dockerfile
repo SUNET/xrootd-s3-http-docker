@@ -1,7 +1,7 @@
 FROM debian:trixie-slim as build
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=UTC
-ARG version=0.1.7
+ARG version=0.1.8
 ENV CMAKE_INSTALL_PREFIX=/usr
 
 RUN apt-get update && apt-get install -y \
