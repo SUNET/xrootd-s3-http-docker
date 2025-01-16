@@ -22,8 +22,6 @@ RUN wget https://github.com/PelicanPlatform/xrootd-s3-http/archive/refs/tags/v${
     mv xrootd-s3-http-${version} xrootd-s3-http && \
     cd xrootd-s3-http && \
     mkdir build
-COPY ./cmake.patch /opt/xrootd-s3-http
-RUN cd /opt/xrootd-s3-http && patch -p1 < cmake.patch
 
 WORKDIR /opt/xrootd-s3-http/build
 RUN cmake -DXROOTD_EXTERNAL_TINYXML2=ON .. 
