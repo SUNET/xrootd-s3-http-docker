@@ -1,6 +1,6 @@
 ---
 environment_variables:
-  XROOTD_S3_HTTP_VERSION: "0.2.1-1"
+  XROOTD_S3_HTTP_VERSION: "0.4.1-1"
 git:
   branch: main
 triggers:
