@@ -30,7 +30,7 @@ RUN make
 FROM debian:trixie-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    xrootd-server libc6 libcurl4t64 libgcc-s1 libssl3t64 libstdc++6 libtinyxml2-11 libxrdserver3t64 libxrdutils3t64 ca-certificates
+    xrootd-server xrootd-voms-plugins libc6 libcurl4t64 libgcc-s1 libssl3t64 libstdc++6 libtinyxml2-11 libxrdserver3t64 libxrdutils3t64 ca-certificates
 RUN mkdir -p /usr/local/share/ca-certificates/sunet
 COPY Sunet-test.crt /usr/local/share/ca-certificates/sunet/Sunet_test_Root_CA.crt
 RUN update-ca-certificates
