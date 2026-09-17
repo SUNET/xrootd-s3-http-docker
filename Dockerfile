@@ -1,10 +1,19 @@
 FROM debian:trixie-slim as build
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=UTC
-ARG version=0.4.1
+ARG version=0.6.9-1
 ENV CMAKE_INSTALL_PREFIX=/usr
 
-RUN apt-get update && apt-get install -y \
+# Debian trixie's own repo is frozen at XRootD 5.8.1 (built 2025-07-14, over
+# a year stale by the time this comment was written). Upstream publishes a
+# real, maintained apt repo for trixie specifically - use it instead to get
+# a current release (6.1.1 as of this writing).
+RUN apt-get update && apt-get install -y --no-install-recommends wget gnupg ca-certificates && \
+    wget -qO /etc/apt/trusted.gpg.d/xrootd.asc https://xrootd.web.cern.ch/repo/RPM-GPG-KEY.txt && \
+    echo "deb https://xrootd.web.cern.ch/debian trixie stable" > /etc/apt/sources.list.d/xrootd.list && \
+    apt-get update
+
+RUN apt-get install -y \
     build-essential \
     cmake \
     wget \
@@ -12,7 +21,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     libcurl4-openssl-dev \
-    libxrdapputils2t64 \
+    libxrdapputils6t64 \
     libxrootd-server-dev \
     libtinyxml2-dev
 
@@ -28,14 +37,22 @@ RUN cmake -DXROOTD_EXTERNAL_TINYXML2=ON ..
 RUN make
 
 FROM debian:trixie-slim
-RUN apt-get update && \
+RUN apt-get update && apt-get install -y --no-install-recommends wget gnupg ca-certificates && \
+    wget -qO /etc/apt/trusted.gpg.d/xrootd.asc https://xrootd.web.cern.ch/repo/RPM-GPG-KEY.txt && \
+    echo "deb https://xrootd.web.cern.ch/debian trixie stable" > /etc/apt/sources.list.d/xrootd.list && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
-    xrootd-server xrootd-voms-plugins libc6 libcurl4t64 libgcc-s1 libssl3t64 libstdc++6 libtinyxml2-11 libxrdserver3t64 libxrdutils3t64 ca-certificates
+    xrootd-server xrootd-voms-plugins libc6 libcurl4t64 libgcc-s1 libssl3t64 libstdc++6 libtinyxml2-11 libxrdserver6t64 libxrdutils6t64
 RUN mkdir -p /usr/local/share/ca-certificates/sunet
 COPY Sunet-test.crt /usr/local/share/ca-certificates/sunet/Sunet_test_Root_CA.crt
 RUN update-ca-certificates
-COPY --from=build /opt/xrootd-s3-http/build/libXrdS3-5.so /usr/lib/
-COPY --from=build /opt/xrootd-s3-http/build/libXrdHTTPServer-5.so /usr/lib/
+COPY --from=build /opt/xrootd-s3-http/build/libXrdS3-6.so /usr/lib/x86_64-linux-gnu/
+COPY --from=build /opt/xrootd-s3-http/build/libXrdHTTPServer-6.so /usr/lib/x86_64-linux-gnu/
+# libXrdS3 and libXrdHTTPServer both link against this shared internal
+# library, introduced since v0.4.1 - missing it fails osslib load with a
+# misleading "No such file or directory" for libXrdS3 itself.
+COPY --from=build /opt/xrootd-s3-http/build/libXrdPelicanHttpCore.so.0.0.0 /usr/lib/x86_64-linux-gnu/
+RUN ln -s libXrdPelicanHttpCore.so.0.0.0 /usr/lib/x86_64-linux-gnu/libXrdPelicanHttpCore.so.0
 COPY ./xrootd-s3-http.cfg /etc/xrootd/
 USER xrootd
 CMD ["xrootd", "-c", "/etc/xrootd/xrootd-s3-http.cfg"]
