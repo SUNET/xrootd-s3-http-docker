@@ -43,6 +43,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends wget gnupg ca-c
     apt-get update && \
     apt-get install -y --no-install-recommends \
     xrootd-server xrootd-voms-plugins libc6 libcurl4t64 libgcc-s1 libssl3t64 libstdc++6 libtinyxml2-11 libxrdserver6t64 libxrdutils6t64
+# CERN's package allocates the xrootd system user/group dynamically (100/101
+# here), unlike Debian's own package (996/996) that all existing xrd* hosts'
+# /opt/xrootd/admin on-disk ownership was set up against. Pin it back to
+# 996/996 so a version bump doesn't silently break write access to
+# already-deployed hosts' bind-mounted admin/log directories.
+RUN groupmod -g 996 xrootd && usermod -u 996 xrootd && \
+    chown -R xrootd:xrootd /var/log/xrootd /var/spool/xrootd
 RUN mkdir -p /usr/local/share/ca-certificates/sunet
 COPY Sunet-test.crt /usr/local/share/ca-certificates/sunet/Sunet_test_Root_CA.crt
 RUN update-ca-certificates
